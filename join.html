@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PrintDeck 家族グループに参加</title>
+<meta name="robots" content="noindex">
+<style>
+  :root { color-scheme: light dark; --bg:#f6f7f9; --card:#fff; --fg:#111; --sub:#666; --accent:#4F8EF7; --line:#e3e5e8; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0f1115; --card:#1a1d23; --fg:#f2f2f2; --sub:#a0a4ab; --line:#2a2e36; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif; }
+  main { max-width:420px; margin:0 auto; padding:40px 20px 60px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:24px 20px; text-align:center; }
+  h1 { font-size:20px; margin:0 0 6px; }
+  p { color:var(--sub); font-size:14px; line-height:1.6; margin:0 0 16px; }
+  .code { font-size:32px; letter-spacing:4px; font-weight:700; margin:8px 0 20px; font-variant-numeric:tabular-nums; }
+  .btn { display:block; width:100%; padding:14px; border-radius:12px; font-size:16px; font-weight:600; text-decoration:none; border:0; cursor:pointer; margin-bottom:10px; }
+  .primary { background:var(--accent); color:#fff; }
+  .secondary { background:transparent; color:var(--accent); border:1px solid var(--line); }
+  .steps { text-align:left; font-size:13px; color:var(--sub); line-height:1.7; margin-top:20px; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+<main>
+  <div class="card">
+    <h1>PrintDeck 家族グループへの招待</h1>
+    <p id="lead">家族からおたよりの共有グループに招待されています。</p>
+    <div id="codeBox" class="hidden">
+      <p style="margin-bottom:0">招待コード</p>
+      <div class="code" id="code"></div>
+    </div>
+    <a id="openApp" class="btn primary" href="#">PrintDeckアプリで参加する</a>
+    <button id="copy" class="btn secondary hidden" type="button">コードをコピー</button>
+    <a class="btn secondary" href="https://apps.apple.com/jp/app/id6766276786">App Storeでアプリを入手</a>
+    <div class="steps" id="steps">
+      <strong>アプリが開かない場合</strong><br>
+      1. PrintDeckをインストールしてサインイン<br>
+      2. 設定タブ →「家族グループ」→「コードで参加」<br>
+      3. 上の招待コードを入力
+    </div>
+  </div>
+</main>
+<script>
+  (function () {
+    var params = new URLSearchParams(location.search);
+    var raw = (params.get('code') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    var ok = /^[A-Z0-9]{6,8}$/.test(raw);
+    var openApp = document.getElementById('openApp');
+    if (!ok) {
+      document.getElementById('lead').textContent = '招待リンクが正しくありません。招待してくれた家族にもう一度リンクを送ってもらってください。';
+      openApp.classList.add('hidden');
+      document.getElementById('steps').classList.add('hidden');
+      return;
+    }
+    var pretty = raw.length === 8 ? raw.slice(0, 4) + '-' + raw.slice(4) : raw;
+    document.getElementById('code').textContent = pretty;
+    document.getElementById('codeBox').classList.remove('hidden');
+    var deepLink = 'printdeck://join?code=' + raw;
+    openApp.setAttribute('href', deepLink);
+
+    var copyBtn = document.getElementById('copy');
+    if (navigator.clipboard) {
+      copyBtn.classList.remove('hidden');
+      copyBtn.addEventListener('click', function () {
+        navigator.clipboard.writeText(pretty).then(function () {
+          copyBtn.textContent = 'コピーしました';
+        });
+      });
+    }
+    // インストール済みなら自動でアプリを開く(ブロックされてもボタンから開ける)。
+    setTimeout(function () { location.href = deepLink; }, 400);
+  })();
+</script>
+</body>
+</html>
